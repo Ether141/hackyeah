@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -11,6 +12,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Grounded status")]
     [SerializeField] private Vector3 groundCheckOffset;
+    [SerializeField] private Vector3 topCheckOffset;
     [SerializeField] private float groundCheckRaysGap = 0.5f;
 
     [Header("Jumping")]
@@ -19,29 +21,22 @@ public class PlayerController : MonoBehaviour
     public float maxJumpTime = 1f;
     [Range(0f, 1f)] public float inAirControl = 1f;
 
-    [Header("Step")]
-    public bool stepHelperEnabled = true;
-    public float maxStepHeight = 0.4f;
-    public float stepCheckLength = 0.45f;
-    public float stepCheckIteration = 0.01f;
-    public float bottomOffset = -0.1f;
-
     [Header("Layers")]
     [SerializeField] private LayerMask groundLayer;
 
     private Vector2 movementVelocity;
     private bool jumpWasCalled = false;
     private float jumpTimeCounter = 0f;
+    private bool isGroundedInstant = false;
+    private float notGroundedTimer = 0f;
 
     private bool forceMovement = false;
     private float forcedMovementSpeed = 2f;
     private Vector2 forcedPosition;
 
-    private bool isStepHelping = false;
-    private Vector2 stepTargetPosition;
-
     private Rigidbody2D rb2d;
     private CapsuleCollider2D col;
+    private PlayerAnimator animator;
 
     private const float CheckGroundRayLength = 0.75f;
 
@@ -59,12 +54,11 @@ public class PlayerController : MonoBehaviour
     {
         get
         {
-            float yPos = transform.position.y + CharacterBounds.extents.y;
             const float dis = 0.5f;
 
-            RaycastHit2D leftHit = Physics2D.Raycast(new Vector2(transform.position.x - CharacterBounds.extents.x, yPos), Vector2.up, dis, groundLayer);
-            RaycastHit2D centerHit = Physics2D.Raycast(new Vector2(transform.position.x, yPos), Vector2.up, dis, groundLayer);
-            RaycastHit2D rightHit = Physics2D.Raycast(new Vector2(transform.position.x + CharacterBounds.extents.x, yPos), Vector2.up, dis, groundLayer);
+            RaycastHit2D leftHit = Physics2D.Raycast(transform.position + topCheckOffset + (Vector3.left * groundCheckRaysGap), Vector2.up, dis, groundLayer);
+            RaycastHit2D centerHit = Physics2D.Raycast(transform.position + topCheckOffset, Vector2.up, dis, groundLayer);
+            RaycastHit2D rightHit = Physics2D.Raycast(transform.position + topCheckOffset + (Vector3.right * groundCheckRaysGap), Vector2.up, dis, groundLayer);
 
             return leftHit.transform != null || centerHit.transform != null || rightHit.transform != null;
         }
@@ -79,14 +73,18 @@ public class PlayerController : MonoBehaviour
     {
         rb2d = GetComponent<Rigidbody2D>();
         col = GetComponent<CapsuleCollider2D>();
+        animator = GetComponent<PlayerAnimator>();
     }
 
     private void Update()
     {
+        Debug.DrawLine(transform.position + topCheckOffset + (Vector3.left * groundCheckRaysGap), transform.position + topCheckOffset + (Vector3.left * groundCheckRaysGap) + (Vector3.up * 0.5f));
+        Debug.DrawLine(transform.position + topCheckOffset, transform.position + topCheckOffset + (Vector3.up * 0.5f));
+        Debug.DrawLine(transform.position + topCheckOffset + (Vector3.right * groundCheckRaysGap), transform.position + topCheckOffset + (Vector3.right * groundCheckRaysGap) + (Vector3.up * 0.5f));
+
         CollectInput();
         CheckGroundedState();
         JumpController();
-        StepHelper();
         ForcePosition();
     }
 
@@ -116,6 +114,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetButtonDown("Jump") && canJump && IsGrounded && canMove)
         {
+            animator.CallJump();
             jumpWasCalled = true;
             rb2d.velocity = Vector2.up * jumpForce;
         }
@@ -148,7 +147,21 @@ public class PlayerController : MonoBehaviour
         bool isCollision = leftHit.transform != null || centerHit.transform != null || rightHit.transform != null;
         bool prevState = IsGrounded;
 
-        IsGrounded = isCollision && rb2d.velocity.y <= 0f;
+        isGroundedInstant = isCollision;
+
+        if (IsGrounded != isGroundedInstant)
+        {
+            notGroundedTimer += Time.deltaTime;
+
+            if (notGroundedTimer > 0.2f)
+            {
+                IsGrounded = isGroundedInstant;
+            }
+        }
+        else
+        {
+            notGroundedTimer = 0f;
+        }
 
         if (!prevState && IsGrounded && !onLandWasInvoked)
         {
@@ -160,46 +173,6 @@ public class PlayerController : MonoBehaviour
         {
             onLandWasInvoked = false;
             jumpWasCalled = false;
-        }
-    }
-
-    private void StepHelper()
-    {
-        if (!stepHelperEnabled)
-        {
-            return;
-        }
-
-        if (isStepHelping && IsMoving)
-        {
-            transform.position = Vector2.Lerp(transform.position, stepTargetPosition, Time.deltaTime * 20f);
-        }
-
-        float xPos = transform.position.x + (transform.right * CharacterBounds.extents.x).x;
-        float yPos = transform.position.y - CharacterBounds.extents.y + bottomOffset;
-
-        Debug.DrawLine(new Vector3(xPos, yPos + maxStepHeight), new Vector3(xPos, yPos + maxStepHeight) + (transform.right * stepCheckLength), Color.red);
-
-        if (!IsMoving || !IsGrounded)
-        {
-            return;
-        }
-
-        isStepHelping = false;
-
-        if (Physics2D.Raycast(new Vector2(xPos, yPos + stepCheckIteration), transform.right, stepCheckLength, groundLayer))
-        {
-            if (Physics2D.Raycast(new Vector2(xPos, yPos + maxStepHeight), transform.right, stepCheckLength, groundLayer))
-                return;
-
-            isStepHelping = true;
-            float currentYPos = yPos + stepCheckIteration;
-
-            while (Physics2D.Raycast(new Vector2(xPos, currentYPos), transform.right, stepCheckLength, groundLayer))
-                currentYPos += stepCheckIteration;
-
-            float offset = Mathf.Abs(yPos - currentYPos);
-            stepTargetPosition = transform.position + new Vector3(0.01f, offset * 2f, 0f);
         }
     }
 

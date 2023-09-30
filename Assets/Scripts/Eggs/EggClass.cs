@@ -7,6 +7,7 @@ public class EggClass : MonoBehaviour
     [SerializeField] private GameObject infoUI;
 
     private SpriteRenderer spriteRenderer;
+    private float shakeForce = 0f;
 
     public int RequiredClicks => eggSprites.Length;
 
@@ -17,10 +18,20 @@ public class EggClass : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
+    private void Update()
+    {
+        shakeForce = Mathf.Lerp(shakeForce, 0f, Time.deltaTime * 5f);
+        transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, Mathf.Sin(Time.time * 45f) * shakeForce * Random.Range(1f, 1.25f));
+    }
+
     private void ClickEgg()
     {
         spriteRenderer.sprite = eggSprites[clicksCount];
         clicksCount++;
+
+        CameraController.Instance.ChangeFOV(CameraController.Instance.CurrentFov - 0.25f, 4f);
+        CameraController.Instance.CustomOffset += Vector3.down * 0.3f;
+        CameraController.Instance.ForceSlowFocus();
 
         print($"{clicksCount} / {RequiredClicks}");
 
@@ -34,6 +45,7 @@ public class EggClass : MonoBehaviour
     private void OnMouseDown()
     {
         ClickEgg();
+        shakeForce = 3.5f;
     }
 
     private void OnMouseEnter()

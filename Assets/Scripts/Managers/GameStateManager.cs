@@ -23,7 +23,7 @@ public class GameStateManager : MonoBehaviour
     public void StartGame()
     {
         FadeController.Instance.FadeOut(fadeOutSpeed);
-        CameraContoller.Instance.SetTarget(startingNest.transform, startingStateCameraOffset, true);
-        CameraContoller.Instance.ChangeFOV(fovs.StartingStateFov, 1000f);
+        CameraController.Instance.SetTarget(startingNest.transform, startingStateCameraOffset, true);
+        CameraController.Instance.ChangeFOV(fovs.StartingStateFov, 1000f);
     }
 }
