@@ -12,6 +12,7 @@ public class RapidEnemy : BaseAI
 
     public bool IsAttacking { get; set; } = false;
     public bool CanDealDamage { get; private set; } = true;
+    public bool IsKnocked { get; private set; } = false;
 
     private Rigidbody2D rb2d;
 
@@ -34,10 +35,30 @@ public class RapidEnemy : BaseAI
         RapidEnemyStates.LookingForPlayer lookingForPlayer = new RapidEnemyStates.LookingForPlayer(this, attackDelay);
 
         StateMachine.AddTransition(patrol, chase, () => isPlayerDetected);
-        StateMachine.AddTransition(chase, attack, () => isPlayerDetected && DistanceToPlayer <= distanceToAttack);
+        StateMachine.AddTransition(chase, attack, () =>
+        {
+            bool condition = isPlayerDetected && DistanceToPlayer <= distanceToAttack;
+
+            if (condition)
+            {
+                anim.SetTrigger("attack");
+            }
+
+            return condition;
+        });
         StateMachine.AddTransition(chase, lookingForPlayer, () => !isPlayerDetected);
         StateMachine.AddTransition(attack, lookingForPlayer, () => !IsAttacking);
-        StateMachine.AddTransition(lookingForPlayer, attack, () => isPlayerDetected && DistanceToPlayer <= distanceToAttack && lookingForPlayer.CanAttack);
+        StateMachine.AddTransition(lookingForPlayer, attack, () =>
+        {
+            bool condition = isPlayerDetected && DistanceToPlayer <= distanceToAttack && lookingForPlayer.CanAttack;
+
+            if (condition)
+            {
+                anim.SetTrigger("attack");
+            }
+
+            return condition;
+        });
         StateMachine.AddTransition(lookingForPlayer, chase, () => isPlayerDetected && DistanceToPlayer > distanceToAttack && lookingForPlayer.CanAttack);
         StateMachine.AddTransition(lookingForPlayer, patrol, () => !isPlayerDetected && lookingForPlayer.CanAttack);
  
@@ -48,33 +69,33 @@ public class RapidEnemy : BaseAI
     {
         base.Update();
 
-        if (StateMachine.IsState<RapidEnemyStates.LookingForPlayer>())
-        {
-            detectionRayLength = startDetectionRayLength * 0.6f;
-        }
-        else
-        {
-            detectionRayLength = startDetectionRayLength;
-        }
-
         AnimatorLogic();
+
+        rb2d.velocity = Vector2.Lerp(rb2d.velocity, Vector2.zero, Time.deltaTime * 3f);
     }
 
     private void AnimatorLogic()
     {
         anim.SetBool("walk", StateMachine.IsState<EnemyCommonStates.Patrol>());
-        anim.SetBool("attack", StateMachine.IsState<RapidEnemyStates.Chase>() || StateMachine.IsState<RapidEnemyStates.Attack>());
+        anim.SetBool("chase", StateMachine.IsState<RapidEnemyStates.Chase>());
     }
 
     public void Attack()
     {
-        print("attack");
         IsAttacking = false;
     }
 
     public override void OnDamage()
     {
-        rb2d.AddForce(-transform.right * 40f, ForceMode2D.Impulse);
+        rb2d.AddForce(-transform.right * 30f, ForceMode2D.Impulse);
+        IsKnocked = true;
+        detectionRayLength *= 2f;
+        this.WaitAndDo(() =>
+        {
+            IsKnocked = false;
+
+            this.WaitAndDo(() => detectionRayLength = startDetectionRayLength, 1f);
+        }, 1f);
     }
 
     public override void Kill()

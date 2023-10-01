@@ -32,7 +32,12 @@ public class RapidEnemyStates
         {
             Vector3 targetPosition = new Vector3(PlayerController.Player.transform.position.x, transform.position.y);
             targetPosition += -transform.right * stopDistance;
-            transform.position = Vector2.MoveTowards(transform.position, targetPosition, Time.deltaTime * runSpeed);
+
+            if (!rapidEnemy.IsKnocked)
+            {
+                transform.position = Vector2.MoveTowards(transform.position, targetPosition, Time.deltaTime * runSpeed);
+                rapidEnemy.FaceTowards(PlayerController.Player.transform.position); 
+            }
         }
     }
 
