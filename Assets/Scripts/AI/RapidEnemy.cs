@@ -15,12 +15,20 @@ public class RapidEnemy : BaseAI
     public bool IsKnocked { get; private set; } = false;
 
     private Rigidbody2D rb2d;
+    private Bone[] bones;
 
     public float DistanceToAttack => distanceToAttack;
 
     protected override void Start()
     {
         base.Start();
+        bones = new Bone[transform.childCount];
+        
+        for (int i = 0; i < bones.Length; i++)
+        {
+            bones[i] = transform.GetChild(i).GetComponent<Bone>();
+        }
+
         rb2d = GetComponent<Rigidbody2D>();
     }
 
@@ -100,6 +108,12 @@ public class RapidEnemy : BaseAI
 
     public override void Kill()
     {
+        foreach (Bone bone in bones)
+        {
+            bone.transform.SetParent(null);
+            bone.gameObject.SetActive(true);
+        }
+
         Destroy(gameObject);
     }
 }

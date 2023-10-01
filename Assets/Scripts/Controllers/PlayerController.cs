@@ -176,4 +176,13 @@ public class PlayerController : MonoBehaviour
         forcedMovementSpeed = speed;
         forceMovement = true;
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.transform.GetComponent<Bone>() != null)
+        {
+            Destroy(collision.transform.gameObject);
+            BonesManager.Instance.AddBones(1);
+        }
+    }
 }

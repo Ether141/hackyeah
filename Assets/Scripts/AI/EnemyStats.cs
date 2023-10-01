@@ -9,7 +9,7 @@ public class EnemyStats : MonoBehaviour
     public void Damage(int damage)
     {
         currentHealth -= damage;
-        print($"Damage: {damage} | {name}");
+
         if (currentHealth < 0)
         {
             currentHealth = 0;
@@ -17,8 +17,6 @@ public class EnemyStats : MonoBehaviour
 
         if (currentHealth == 0)
         {
-            Death();
-
             if (TryGetComponent(out BaseAI ai))
             {
                 ai.Kill();
@@ -31,10 +29,5 @@ public class EnemyStats : MonoBehaviour
                 ai.OnDamage();
             }
         }
-    }
-
-    private void Death()
-    {
-        print("Death");
     }
 }
