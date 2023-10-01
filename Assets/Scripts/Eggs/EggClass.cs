@@ -29,11 +29,10 @@ public class EggClass : MonoBehaviour
         spriteRenderer.sprite = eggSprites[clicksCount];
         clicksCount++;
 
+        controller.RemoveInfo();
         CameraController.Instance.ChangeFOV(CameraController.Instance.CurrentFov - 0.25f, 4f);
         CameraController.Instance.CustomOffset += Vector3.down * 0.3f;
         CameraController.Instance.ForceSlowFocus();
-
-        print($"{clicksCount} / {RequiredClicks}");
 
         if (clicksCount == RequiredClicks)
         {

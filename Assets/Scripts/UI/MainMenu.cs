@@ -1,9 +1,15 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private GameObject mainPage;
     [SerializeField] private GameObject credits;
+
+    public void LoadMainScene()
+    {
+        SceneManager.LoadScene(1);
+    }
 
     public void OpenMainPage()
     {

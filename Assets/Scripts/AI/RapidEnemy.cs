@@ -10,6 +10,9 @@ public class RapidEnemy : BaseAI
     [SerializeField] private float distanceToAttack = 3f;
     [SerializeField] private float attackDelay = 1f;
 
+    [Header("Misc")]
+    [SerializeField] private GameObject boomEffect;
+
     public bool IsAttacking { get; set; } = false;
     public bool CanDealDamage { get; private set; } = true;
     public bool IsKnocked { get; private set; } = false;
@@ -42,7 +45,7 @@ public class RapidEnemy : BaseAI
         RapidEnemyStates.Attack attack = new RapidEnemyStates.Attack(this);
         RapidEnemyStates.LookingForPlayer lookingForPlayer = new RapidEnemyStates.LookingForPlayer(this, attackDelay);
 
-        StateMachine.AddTransition(patrol, chase, () => isPlayerDetected);
+        StateMachine.AddTransition(patrol, chase, () => isPlayerDetected && player.GetComponent<PlayerStats>().IsAlive);
         StateMachine.AddTransition(chase, attack, () =>
         {
             bool condition = isPlayerDetected && DistanceToPlayer <= distanceToAttack;
@@ -69,6 +72,7 @@ public class RapidEnemy : BaseAI
         });
         StateMachine.AddTransition(lookingForPlayer, chase, () => isPlayerDetected && DistanceToPlayer > distanceToAttack && lookingForPlayer.CanAttack);
         StateMachine.AddTransition(lookingForPlayer, patrol, () => !isPlayerDetected && lookingForPlayer.CanAttack);
+        StateMachine.AddTransition(lookingForPlayer, patrol, () => !player.GetComponent<PlayerStats>().IsAlive);
  
         StateMachine.SwitchState(patrol);
     }
@@ -115,10 +119,15 @@ public class RapidEnemy : BaseAI
     {
         foreach (Bone bone in bones)
         {
-            bone.transform.SetParent(null);
-            bone.gameObject.SetActive(true);
+            if (bone != null)
+            {
+                bone.transform.SetParent(null);
+                bone.gameObject.SetActive(true);
+            }
         }
 
+        boomEffect.transform.SetParent(null);
+        boomEffect.SetActive(true);
         Destroy(gameObject);
     }
 }

@@ -7,6 +7,7 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private int currentHealth = 10;
     [SerializeField] private Image healthBar;
 
+    public bool IsAlive => CurrentHealth > 0;
     public int CurrentHealth { get => currentHealth; set => currentHealth = value; }
 
     private void Start()
@@ -25,7 +26,7 @@ public class PlayerStats : MonoBehaviour
 
         if (CurrentHealth <= 0)
         {
-            print("dead");
+            GetComponent<PlayerController>().Death();
         }
     }
 

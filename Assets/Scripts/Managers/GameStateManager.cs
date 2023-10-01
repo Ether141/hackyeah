@@ -49,7 +49,7 @@ public class GameStateManager : MonoBehaviourSingleton<GameStateManager>
         this.WaitAndDo(() =>
         {
             player.GetComponent<SpriteRenderer>().enabled = true;
-        }, 0.5f);
+        }, 0.1f);
 
         this.WaitAndDo(() =>
         {
@@ -60,6 +60,7 @@ public class GameStateManager : MonoBehaviourSingleton<GameStateManager>
 
     public void EnterMutationState()
     {
+        gameplayUI.SetActive(false);
         BlurController.Instance.Blur();
         this.WaitAndDo(() => mutationWindow.SetActive(true), 0.5f);
     }

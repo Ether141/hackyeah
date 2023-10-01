@@ -61,6 +61,8 @@ public class PlayerAnimator : MonoBehaviour
         anim.SetFloat("walkMulti", WalkAnimationMulti);
     }
 
+    public void Attack() => anim.SetTrigger("attack");
+
     private void FlipPlayer()
     {
         if (playerController.IsMoving)

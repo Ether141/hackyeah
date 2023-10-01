@@ -23,6 +23,9 @@ public class PlayerController : MonoBehaviour
     [Header("Layers")]
     [SerializeField] private LayerMask groundLayer;
 
+    [Header("Misc")]
+    [SerializeField] private GameObject boomEffect;
+
     private Vector2 movementVelocity;
     private bool jumpWasCalled = false;
     private float jumpTimeCounter = 0f;
@@ -166,9 +169,10 @@ public class PlayerController : MonoBehaviour
     public void Death()
     {
         canMove = false;
-        rb2d.velocity = Vector2.up * jumpForce;
-        jumpWasCalled = true;
-        col.enabled = false;
+        rb2d.velocity = Vector2.zero;
+        boomEffect.SetActive(true);
+        this.WaitAndDo(() => GetComponent<SpriteRenderer>().enabled = false, 0.1f);
+        this.WaitAndDo(() => GameStateManager.Instance.EnterMutationState(), 1.5f);
     }
 
     public void MoveTo(Vector2 pos, float speed)

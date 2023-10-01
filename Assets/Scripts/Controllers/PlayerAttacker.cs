@@ -26,6 +26,7 @@ public class PlayerAttacker : MonoBehaviour
             return;
         }
 
+        GetComponent<PlayerAnimator>().Attack();
         enemies.RemoveAll(e => e == null);
         EnemyStats closestEnemy = enemies.OrderBy(s => Vector2.Distance(transform.position, s.transform.position)).FirstOrDefault();
         closestEnemy?.Damage(1);
