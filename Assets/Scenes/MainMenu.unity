@@ -838,13 +838,14 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '...
+  m_text: 'Oliwia Bartkowska
 
-    ...
+    Joanna Kazalska
 
     Kacper Slusarczyk
 
-    Bartlomiej Pacult'
+    Bartlomiej
+    Pacult'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: aa5abba180bf4024d8a37b17fba518c5, type: 2}
   m_sharedMaterial: {fileID: -5688445825982792191, guid: aa5abba180bf4024d8a37b17fba518c5, type: 2}
