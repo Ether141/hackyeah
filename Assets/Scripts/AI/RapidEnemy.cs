@@ -91,6 +91,11 @@ public class RapidEnemy : BaseAI
     public void Attack()
     {
         IsAttacking = false;
+
+        if (isPlayerDetected)
+        {
+            PlayerController.Player.GetComponent<PlayerStats>().TakeDamage(1);
+        }
     }
 
     public override void OnDamage()

@@ -35,5 +35,7 @@ public class EggsController : MonoBehaviour
         {
             Destroy(egg);
         }
+
+        GameStateManager.Instance.ContinueStartGame();
     }
 }

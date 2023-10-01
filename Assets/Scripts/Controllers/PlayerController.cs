@@ -51,6 +51,7 @@ public class PlayerController : MonoBehaviour
     {
         get
         {
+            return false;
             const float dis = 0.5f;
 
             RaycastHit2D leftHit = Physics2D.Raycast(transform.position + topCheckOffset + (Vector3.left * groundCheckRaysGap), Vector2.up, dis, groundLayer);
