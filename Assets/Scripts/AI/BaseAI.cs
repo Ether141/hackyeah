@@ -13,6 +13,7 @@ public abstract class BaseAI : MonoBehaviour
     protected SpriteRenderer spriteRenderer;
     protected GameObject player;
     protected float startDetectionRayLength;
+    protected Animator anim;
 
     public bool IsRightFaced => transform.eulerAngles.y == 0f;
     public float DistanceToPlayer => Vector2.Distance(transform.position, player.transform.position);
@@ -21,6 +22,7 @@ public abstract class BaseAI : MonoBehaviour
     protected virtual void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
         player = PlayerController.Player;
         startDetectionRayLength = detectionRayLength;
 
@@ -74,4 +76,8 @@ public abstract class BaseAI : MonoBehaviour
             isPlayerDetected = false;
         }
     }
+
+    public abstract void OnDamage();
+
+    public abstract void Kill();
 }

@@ -5,7 +5,7 @@ public class ParallaxBackground : MonoBehaviour
     [SerializeField] private GameObject cam;
     [SerializeField] private float parallaxEffect;
     [SerializeField] private bool followCameraY = true;
-    [SerializeField] private Vector3 offset;
+    [SerializeField] private float yOffset;
 
     private float length;
     private float startpos;
@@ -24,7 +24,7 @@ public class ParallaxBackground : MonoBehaviour
         float dist = cam.transform.position.x * parallaxEffect;
         float distY = cam.transform.position.y * parallaxEffect;
 
-        transform.position = new Vector3(startpos + dist, followCameraY ? startposY + distY : transform.position.y, transform.position.z) + offset;
+        transform.position = new Vector3(startpos + dist, followCameraY ? startposY + distY : transform.position.y + yOffset, transform.position.z);
 
         if (tmp > startpos + length)
             startpos += length;

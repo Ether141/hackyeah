@@ -10,6 +10,8 @@ public class PlayerAnimator : MonoBehaviour
     private float notGroundedTimer = 0f;
     private bool jumpCalled = false;
 
+    public float WalkAnimationMulti { get; set; } = 1f;
+
     private void Start()
     {
         playerController = GetComponent<PlayerController>();
@@ -56,6 +58,7 @@ public class PlayerAnimator : MonoBehaviour
 
         anim.SetFloat("x", playerController.IsMoving ? Mathf.Abs(playerController.HorizontalMovement) : 0f);
         anim.SetBool("isGrounded", isGrounded);
+        anim.SetFloat("walkMulti", WalkAnimationMulti);
     }
 
     private void FlipPlayer()

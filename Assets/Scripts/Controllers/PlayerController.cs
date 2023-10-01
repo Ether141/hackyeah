@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -27,8 +26,6 @@ public class PlayerController : MonoBehaviour
     private Vector2 movementVelocity;
     private bool jumpWasCalled = false;
     private float jumpTimeCounter = 0f;
-    private bool isGroundedInstant = false;
-    private float notGroundedTimer = 0f;
 
     private bool forceMovement = false;
     private float forcedMovementSpeed = 2f;
@@ -36,7 +33,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb2d;
     private CapsuleCollider2D col;
-    private PlayerAnimator animator;
+    private PlayerAnimator animator; 
 
     private const float CheckGroundRayLength = 0.75f;
 
@@ -78,10 +75,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Debug.DrawLine(transform.position + topCheckOffset + (Vector3.left * groundCheckRaysGap), transform.position + topCheckOffset + (Vector3.left * groundCheckRaysGap) + (Vector3.up * 0.5f));
-        Debug.DrawLine(transform.position + topCheckOffset, transform.position + topCheckOffset + (Vector3.up * 0.5f));
-        Debug.DrawLine(transform.position + topCheckOffset + (Vector3.right * groundCheckRaysGap), transform.position + topCheckOffset + (Vector3.right * groundCheckRaysGap) + (Vector3.up * 0.5f));
-
         CollectInput();
         CheckGroundedState();
         JumpController();
@@ -114,8 +107,9 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetButtonDown("Jump") && canJump && IsGrounded && canMove)
         {
+            this.WaitAndDo(() => jumpWasCalled = true, 0.1f);
+
             animator.CallJump();
-            jumpWasCalled = true;
             rb2d.velocity = Vector2.up * jumpForce;
         }
 
@@ -147,21 +141,7 @@ public class PlayerController : MonoBehaviour
         bool isCollision = leftHit.transform != null || centerHit.transform != null || rightHit.transform != null;
         bool prevState = IsGrounded;
 
-        isGroundedInstant = isCollision;
-
-        if (IsGrounded != isGroundedInstant)
-        {
-            notGroundedTimer += Time.deltaTime;
-
-            if (notGroundedTimer > 0.2f)
-            {
-                IsGrounded = isGroundedInstant;
-            }
-        }
-        else
-        {
-            notGroundedTimer = 0f;
-        }
+        IsGrounded = isCollision;
 
         if (!prevState && IsGrounded && !onLandWasInvoked)
         {

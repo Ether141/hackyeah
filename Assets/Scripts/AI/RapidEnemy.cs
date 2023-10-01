@@ -13,7 +13,15 @@ public class RapidEnemy : BaseAI
     public bool IsAttacking { get; set; } = false;
     public bool CanDealDamage { get; private set; } = true;
 
+    private Rigidbody2D rb2d;
+
     public float DistanceToAttack => distanceToAttack;
+
+    protected override void Start()
+    {
+        base.Start();
+        rb2d = GetComponent<Rigidbody2D>();
+    }
 
     protected override void InitializeStateMachine()
     {
@@ -48,11 +56,29 @@ public class RapidEnemy : BaseAI
         {
             detectionRayLength = startDetectionRayLength;
         }
+
+        AnimatorLogic();
+    }
+
+    private void AnimatorLogic()
+    {
+        anim.SetBool("walk", StateMachine.IsState<EnemyCommonStates.Patrol>());
+        anim.SetBool("attack", StateMachine.IsState<RapidEnemyStates.Chase>() || StateMachine.IsState<RapidEnemyStates.Attack>());
     }
 
     public void Attack()
     {
         print("attack");
         IsAttacking = false;
+    }
+
+    public override void OnDamage()
+    {
+        rb2d.AddForce(-transform.right * 40f, ForceMode2D.Impulse);
+    }
+
+    public override void Kill()
+    {
+        Destroy(gameObject);
     }
 }
